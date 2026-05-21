@@ -42,6 +42,12 @@ export const TodoFooter: React.FC<Props> = ({
     },
   ];
 
+  const dataCyMap: Record<Filter, string> = {
+    all: 'FilterLinkAll',
+    active: 'FilterLinkActive',
+    completed: 'FilterLinkCompleted',
+  };
+
   return (
     <footer className="todoapp__footer" data-cy="Footer">
       <span className="todo-count" data-cy="TodosCounter">
@@ -53,6 +59,7 @@ export const TodoFooter: React.FC<Props> = ({
           <a
             key={item.value}
             href={item.href}
+            data-cy={dataCyMap[item.value]}
             className={classNames('filter__link', {
               selected: filter === item.value,
             })}
