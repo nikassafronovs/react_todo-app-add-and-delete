@@ -3,6 +3,12 @@ import classNames from 'classnames';
 
 type Filter = 'all' | 'active' | 'completed';
 
+type FilterOption = {
+  value: Filter;
+  label: string;
+  href: string;
+};
+
 type Props = {
   activeTodosCount: number;
   filter: Filter;
@@ -18,6 +24,24 @@ export const TodoFooter: React.FC<Props> = ({
   hasCompleted,
   onClearCompleted,
 }) => {
+  const filters: FilterOption[] = [
+    {
+      value: 'all',
+      label: 'All',
+      href: '#/',
+    },
+    {
+      value: 'active',
+      label: 'Active',
+      href: '#/active',
+    },
+    {
+      value: 'completed',
+      label: 'Completed',
+      href: '#/completed',
+    },
+  ];
+
   return (
     <footer className="todoapp__footer" data-cy="Footer">
       <span className="todo-count" data-cy="TodosCounter">
@@ -25,47 +49,21 @@ export const TodoFooter: React.FC<Props> = ({
       </span>
 
       <nav className="filter" data-cy="Filter">
-        <a
-          href="#/"
-          className={classNames('filter__link', {
-            selected: filter === 'all',
-          })}
-          data-cy="FilterLinkAll"
-          onClick={e => {
-            e.preventDefault();
-            setFilter('all');
-          }}
-        >
-          All
-        </a>
-
-        <a
-          href="#/active"
-          className={classNames('filter__link', {
-            selected: filter === 'active',
-          })}
-          data-cy="FilterLinkActive"
-          onClick={e => {
-            e.preventDefault();
-            setFilter('active');
-          }}
-        >
-          Active
-        </a>
-
-        <a
-          href="#/completed"
-          className={classNames('filter__link', {
-            selected: filter === 'completed',
-          })}
-          data-cy="FilterLinkCompleted"
-          onClick={e => {
-            e.preventDefault();
-            setFilter('completed');
-          }}
-        >
-          Completed
-        </a>
+        {filters.map(item => (
+          <a
+            key={item.value}
+            href={item.href}
+            className={classNames('filter__link', {
+              selected: filter === item.value,
+            })}
+            onClick={event => {
+              event.preventDefault();
+              setFilter(item.value);
+            }}
+          >
+            {item.label}
+          </a>
+        ))}
       </nav>
 
       <button

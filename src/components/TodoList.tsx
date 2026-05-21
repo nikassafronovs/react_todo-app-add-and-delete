@@ -6,7 +6,7 @@ import { TransitionGroup, CSSTransition } from 'react-transition-group';
 type Props = {
   todos: Todo[];
   onDelete: (id: number) => void;
-  loadingTodoId: number | null;
+  loadingTodoIds: number[];
   loading: boolean;
 };
 
@@ -14,7 +14,7 @@ export const TodoList: React.FC<Props> = ({
   todos,
   loading,
   onDelete,
-  loadingTodoId,
+  loadingTodoIds,
 }) => {
   return (
     <section className="todoapp__main" data-cy="TodoList">
@@ -31,7 +31,7 @@ export const TodoList: React.FC<Props> = ({
             <TodoItem
               key={todo.id}
               todo={todo}
-              loading={loadingTodoId === todo.id}
+              loading={loadingTodoIds.includes(todo.id)}
               onDelete={onDelete}
             />
           </CSSTransition>

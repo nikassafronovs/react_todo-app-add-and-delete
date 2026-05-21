@@ -13,6 +13,13 @@ import { TodoItem } from './components/TodoItem';
 
 type Filter = 'all' | 'active' | 'completed';
 
+enum ErrorMessage {
+  Load = 'Unable to load todos',
+  Add = 'Unable to add a todo',
+  Delete = 'Unable to delete a todo',
+  EmptyTitle = 'Title should not be empty',
+}
+
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
@@ -21,7 +28,7 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [isAdding, setIsAdding] = useState(false);
-  const [loadingTodoId, setLoadingTodoId] = useState<number | null>(null);
+  const [loadingTodoIds, setLoadingTodoIds] = useState<number[]>([]);
 
   const focusInput = () => {
     setTimeout(() => {
@@ -39,7 +46,7 @@ export const App: React.FC = () => {
     getTodos()
       .then(setTodos)
       .catch(() => {
-        setErrorMessage('Unable to load todos');
+        setErrorMessage(ErrorMessage.Load);
 
         setTimeout(() => {
           setErrorMessage('');
@@ -84,7 +91,7 @@ export const App: React.FC = () => {
       setTitle('');
       setIsAdding(false);
     } catch (error) {
-      setErrorMessage('Unable to add a todo');
+      setErrorMessage(ErrorMessage.Add);
       setTempTodo(null);
       setIsAdding(false);
 
@@ -100,25 +107,23 @@ export const App: React.FC = () => {
 
   async function deleteTodo(todoId: number) {
     try {
-      setLoadingTodoId(todoId);
+      setLoadingTodoIds(current => [...current, todoId]);
 
       await client.delete(`/todos/${todoId}`);
 
       setTodos(current => current.filter(todo => todo.id !== todoId));
     } catch (error) {
-      setErrorMessage('Unable to delete a todo');
+      setErrorMessage(ErrorMessage.Delete);
     } finally {
-      setLoadingTodoId(null);
+      setLoadingTodoIds(current => current.filter(id => id !== todoId));
       focusInput();
     }
   }
 
-  const clearCompleted = () => {
-    const completedTodos = todos.filter(todo => todo.completed);
+  const clearCompleted = async () => {
+    const comletedTodos = todos.filter(todo => todo.completed);
 
-    completedTodos.forEach(todo => {
-      deleteTodo(todo.id);
-    });
+    await Promise.all(comletedTodos.map(todo => deleteTodo(todo.id)));
   };
 
   const handleSubmit = () => {
@@ -129,7 +134,7 @@ export const App: React.FC = () => {
     }
 
     if (!trimmedTitle) {
-      setErrorMessage('Title should not be empty');
+      setErrorMessage(ErrorMessage.EmptyTitle);
 
       setTimeout(() => {
         setErrorMessage('');
@@ -167,7 +172,7 @@ export const App: React.FC = () => {
             loading={loading}
             todos={visibleTodos}
             onDelete={deleteTodo}
-            loadingTodoId={loadingTodoId}
+            loadingTodoIds={loadingTodoIds}
           />
 
           {tempTodo && (
